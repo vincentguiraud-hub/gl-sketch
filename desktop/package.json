@@ -1,0 +1,22 @@
+{
+  "name": "gl-sketch-desktop",
+  "productName": "G&L Sketch",
+  "version": "1.3.0",
+  "description": "G&L Sketch – modeleur 3D de G&L Créations",
+  "author": "G&L Créations",
+  "main": "main.cjs",
+  "scripts": { "start": "electron .", "dist": "electron-builder --win nsis" },
+  "dependencies": { "electron-updater": "^6.3.9" },
+  "devDependencies": { "electron": "^33.4.11", "electron-builder": "^26.0.0" },
+  "build": {
+    "appId": "fr.glcreations.sketch",
+    "productName": "G&L Sketch",
+    "copyright": "G&L Créations",
+    "files": ["main.cjs", "preload.cjs", "icon.png", "app/**/*"],
+    "directories": { "output": "dist" },
+    "fileAssociations": [{ "ext": "glsketch", "name": "Projet G&L Sketch", "description": "Projet G&L Sketch", "icon": "icon.ico", "role": "Editor" }],
+    "win": { "target": "nsis", "icon": "icon.ico" },
+    "nsis": { "oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true, "createStartMenuShortcut": true, "shortcutName": "G&L Sketch", "artifactName": "GL-Sketch-Setup.${ext}", "installerIcon": "icon.ico", "uninstallerIcon": "icon.ico", "language": "1036", "runAfterFinish": true },
+    "publish": [{ "provider": "github", "owner": "vincentguiraud-hub", "repo": "gl-sketch", "releaseType": "release" }]
+  }
+}

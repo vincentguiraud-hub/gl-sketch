@@ -1,0 +1,15 @@
+{
+  "name": "gl-sketch",
+  "private": true,
+  "version": "1.3.0",
+  "description": "G&L Sketch – modeleur 3D de G&L Créations",
+  "type": "module",
+  "scripts": { "build": "node build.mjs" },
+  "dependencies": {
+    "fflate": "0.8.3",
+    "three": "0.186.1",
+    "three-bvh-csg": "0.0.18",
+    "three-mesh-bvh": "0.9.17"
+  },
+  "devDependencies": { "esbuild": "0.28.2" }
+}

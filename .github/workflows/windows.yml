@@ -1,0 +1,26 @@
+name: Installateur Windows
+on:
+  push:
+    branches: [main]
+    paths: ["desktop/**", ".github/workflows/windows.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: npm run build
+      - name: Copier l'application dans le lanceur (copie hors connexion)
+        shell: bash
+        run: rm -rf desktop/app && mkdir -p desktop/app && cp dist/index.html dist/version.json desktop/app/
+      - name: Construire et publier l'installateur
+        working-directory: desktop
+        env: { GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
+        run: |
+          npm ci
+          npx electron-builder --win nsis --x64 --publish always
