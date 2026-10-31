@@ -1,0 +1,39 @@
+name: Étiquettes de version
+# Pose automatiquement les étiquettes « version/x.y.z » manquantes (une par version publiée),
+# utilisées pour le retour arrière et la copie de secours /precedente/.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: write
+concurrency: { group: etiquettes, cancel-in-progress: false }
+jobs:
+  tags:
+    runs-on: ubuntu-latest
+    env: { GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Poser les étiquettes manquantes
+        id: t
+        run: |
+          git config user.name "Assistant Claude (G&L Sketch)"
+          git config user.email "noreply@anthropic.com"
+          git fetch --tags -q
+          NEW=0; PREV_V=""; PREV_C=""
+          for c in $(git rev-list --reverse --first-parent HEAD); do
+            V=$(git show "$c:package.json" 2>/dev/null | node -p 'try{JSON.parse(require("fs").readFileSync(0,"utf8")).version}catch(e){""}')
+            if [ -n "$PREV_V" ] && [ "$V" != "$PREV_V" ] && ! git rev-parse -q --verify "refs/tags/version/$PREV_V" >/dev/null; then
+              git tag -a "version/$PREV_V" "$PREV_C" -m "Version $PREV_V"; NEW=1; echo "version/$PREV_V -> $PREV_C"
+            fi
+            PREV_V="$V"; PREV_C="$c"
+          done
+          if [ -n "$PREV_V" ] && ! git rev-parse -q --verify "refs/tags/version/$PREV_V" >/dev/null; then
+            git tag -a "version/$PREV_V" HEAD -m "Version $PREV_V"; NEW=1; echo "version/$PREV_V -> HEAD"
+          fi
+          if [ "$NEW" = 1 ]; then git push -q origin --tags; echo "new=1" >> "$GITHUB_OUTPUT"; fi
+      - name: Reconstruire le site (copie de secours à jour)
+        if: steps.t.outputs.new == '1'
+        run: gh workflow run pages.yml --ref main
