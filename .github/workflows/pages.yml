@@ -13,10 +13,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
       - run: npm run build
+      - name: Copie de secours de la version précédente (/precedente/)
+        continue-on-error: true
+        run: |
+          git fetch --tags -q
+          CUR=$(git rev-parse HEAD^{tree}); PREV=""
+          for t in $(git tag -l 'version/*' --sort=-creatordate); do
+            [ "$(git rev-parse "$t^{tree}")" != "$CUR" ] && { PREV="$t"; break; }
+          done
+          [ -z "$PREV" ] && { echo "Pas encore de version précédente"; exit 0; }
+          git worktree add -q /tmp/prev "$PREV"
+          (cd /tmp/prev && npm ci --no-audit --no-fund && npm run build)
+          mkdir -p dist/precedente && cp /tmp/prev/dist/index.html /tmp/prev/dist/version.json dist/precedente/
+          echo "Copie de secours : $PREV"
       - uses: actions/upload-pages-artifact@v3
         with: { path: dist }
   deploy:

@@ -6,6 +6,7 @@ import * as F from './features.js';
 import { ICONS } from './icons.js';
 import { swatchURL } from './textures.js';
 import { ViewCube } from './viewcube.js';
+import { Assistant } from './assistant.js';
 const { Vector3, Matrix4 } = THREE;
 
 const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
@@ -30,7 +31,7 @@ const TOOLGROUPS = [
 ];
 const TOOLS = TOOLGROUPS.flat();
 const TOOLNAME = Object.fromEntries(TOOLS.map(([k, n]) => [k, n])); TOOLNAME.look = 'Regarder autour'; TOOLNAME.place = 'Placer'; TOOLNAME.zoomwin = 'Zoom fenêtre';
-const PANELS = [['info', 'Entité', 'info'], ['mat', 'Matières', 'palette'], ['comp', 'Composants', 'component'], ['tags', 'Balises', 'layers'], ['scenes', 'Scènes', 'scenes'], ['styles', 'Styles', 'styles'], ['shadow', 'Ombres', 'sun'], ['outliner', 'Structure', 'tree']];
+const PANELS = [['assistant', 'Assistant Claude', 'sparkle'], ['info', 'Entité', 'info'], ['mat', 'Matières', 'palette'], ['comp', 'Composants', 'component'], ['tags', 'Balises', 'layers'], ['scenes', 'Scènes', 'scenes'], ['styles', 'Styles', 'styles'], ['shadow', 'Ombres', 'sun'], ['outliner', 'Structure', 'tree']];
 const KEYMAP = { k: '_backedges', ' ': 'select', e: 'eraser', l: 'line', a: 'arc', r: 'rect', c: 'circle', p: 'pushpull', f: 'offset', m: 'move', q: 'rotate', s: 'scale', t: 'tape', d: 'dimension', b: 'paint', o: 'orbit', h: 'pan', z: 'zoom' };
 
 export class UI {
@@ -43,6 +44,7 @@ export class UI {
     for (const [k, C] of Object.entries(T.TOOL_CLASSES)) this.tools[k] = new C(app, this);
     this.tools.polygon = T.makePolygonTool(app, this); this.tools.look = T.makeLookTool(app, this);
     this.native = window.glNative || null; if (this.native) this.initNative();
+    this.assistant = new Assistant(this, APP_VERSION);
     this.tool = null;
     this.bindEvents();
     app.on('toast', (m) => this.toast(m));
@@ -66,7 +68,7 @@ export class UI {
   checkUpdates() {
     if (!/^https?:$/.test(location.protocol) || !/github\.io$/.test(location.hostname) || !APP_BUILD) return;
     const check = async () => { try { const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' }); if (!r.ok) return; const j = await r.json(); if (j.build && j.build !== APP_BUILD) { this.newBuild = j; $('#updbanner').classList.add('on'); } } catch (e) { /* hors ligne */ } };
-    setTimeout(check, 20000); setInterval(check, 10 * 60 * 1000);
+    this.checkNow = check; setTimeout(check, 20000); setInterval(check, 10 * 60 * 1000);
   }
   async applyUpdate() {
     if (this.app.dirty && !(await this.confirm('Le modèle a des modifications non enregistrées. Elles seront conservées dans la sauvegarde automatique. Recharger maintenant ?'))) return;
@@ -86,7 +88,7 @@ export class UI {
       ['Métallerie', [['Garde-corps…', 'gen:gc'], ['Escalier droit…', 'gen:esc'], ['Pergola…', 'gen:perg'], ['Portail…', 'gen:port'], ['Profilé sur mesure…', 'gen:prof'], '-', ['Liste de débit, poids et métré…', 'report']]],
       ['Outils', [['Sélectionner', 't:select', 'Espace'], ['Gomme', 't:eraser', 'E'], ['Colorier', 't:paint', 'B'], '-', ['Déplacer', 't:move', 'M'], ['Faire pivoter', 't:rotate', 'Q'], ['Échelle', 't:scale', 'S'], ['Pousser/tirer', 't:pushpull', 'P'], ['Suivez-moi', 't:followme'], ['Décalage', 't:offset', 'F'], '-', ['Mètre', 't:tape', 'T'], ['Rapporteur', 't:protractor'], ['Cotation', 't:dimension', 'D'], ['Texte', 't:text'], ['Plan de section', 't:section'], '-', ['Adoucir / lisser par angle…', 'softenAngle'], ['Liste de débit et métré…', 'report'], '-', ['Solides : Union', 'solid:union'], ['Solides : Soustraire', 'solid:sub'], ['Solides : Intersection', 'solid:inter'], ['Solides : Couper', 'solid:trim']]],
       ['Fenêtre', PANELS.map(([id, n]) => [n, 'p:' + id])],
-      ['Aide', [['Raccourcis clavier', 'help', 'F1'], ['À propos', 'about']]],
+      ['Aide', [['Demander à Claude (Assistant)…', 'p:assistant'], '-', ['Raccourcis clavier', 'help', 'F1'], ['À propos', 'about']]],
     ];
     const titlebar = h('header', { class: 'titlebar' },
       h('button', { class: 'ibtn hamb', 'data-tip': 'Menu', html: ICONS.menu, onclick: (e) => { e.stopPropagation(); this.root.classList.toggle('menus-open'); } }),
@@ -95,6 +97,8 @@ export class UI {
         h('div', { class: 'mdrop' }, items.map((it) => (it === '-' ? h('hr') : h('button', { 'data-cmd': it[1], onclick: () => { this.closeMenus(); this.root.classList.remove('menus-open'); this.cmd(it[1]); } }, h('span', {}, it[0]), it[2] ? h('kbd', {}, it[2]) : null))))))),
       h('div', { class: 'docname' }, h('span', { class: 'dot', id: 'dirtydot' }), h('span', { id: 'docname' }, 'Sans titre')),
       h('div', { class: 'tright' },
+        h('button', { class: 'asbtn', 'data-tip': 'Signaler un problème ou demander une modification : Claude s\'en occupe', html: ICONS.sparkle + '<span>Assistant</span>', onclick: () => this.openPanel('assistant') }),
+        h('i', { class: 'vsep' }),
         h('button', { class: 'ibtn', 'data-tip': 'Annuler', 'data-key': 'Ctrl+Z', html: ICONS.undo, onclick: () => this.cmd('undo') }),
         h('button', { class: 'ibtn', 'data-tip': 'Rétablir', 'data-key': 'Ctrl+Y', html: ICONS.redo, onclick: () => this.cmd('redo') }),
         h('i', { class: 'vsep' }),
@@ -664,7 +668,7 @@ export class UI {
   }
 
   // ----------------------------------------------------------- Panneaux
-  openPanel(id) { this.root.classList.add('tray-open'); this.activePanel = id; this.root.querySelectorAll('.tray .panel').forEach((p) => p.classList.toggle('open', p.id === 'p-' + id)); this.root.querySelectorAll('.tray .tab[data-panel]').forEach((t) => t.classList.toggle('on', t.dataset.panel === id)); $('#ptitle').textContent = (PANELS.find((x) => x[0] === id) || [0, ''])[1]; }
+  openPanel(id) { this.root.classList.add('tray-open'); this.activePanel = id; this.root.querySelectorAll('.tray .panel').forEach((p) => p.classList.toggle('open', p.id === 'p-' + id)); this.root.querySelectorAll('.tray .tab[data-panel]').forEach((t) => t.classList.toggle('on', t.dataset.panel === id)); $('#ptitle').textContent = (PANELS.find((x) => x[0] === id) || [0, ''])[1]; if (id === 'assistant') { this.root.querySelector('.tab[data-panel=assistant]')?.classList.remove('badge'); this.assistant?.render(); } }
   renderAll() { this.renderEntityInfo(); this.renderMaterials(); this.renderComponents(); this.renderTags(); this.renderScenes(); this.renderStyles(); this.renderShadow(); this.renderOutliner(); this.updateContextBar(); $('#docname').textContent = this.app.model.name; }
   renderEntityInfo() {
     const app = this.app; const b = $('#pb-info'); const D = app.activeDef; const sel = [...app.sel]; b.innerHTML = '';

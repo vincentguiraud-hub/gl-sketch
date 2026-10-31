@@ -10,4 +10,5 @@ fs.mkdirSync('dist', { recursive: true });
 fs.writeFileSync('dist/index.html', html);
 fs.writeFileSync('dist/version.json', JSON.stringify({ version: pkg.version, build }));
 fs.writeFileSync('dist/.nojekyll', '');
+if (fs.existsSync('versions.json')) fs.copyFileSync('versions.json', 'dist/versions.json');
 console.log('G&L Sketch', pkg.version, '→ dist/index.html', (html.length / 1024).toFixed(0) + ' Ko');

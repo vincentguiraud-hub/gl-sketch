@@ -1,0 +1,14 @@
+[
+ {
+  "version": "1.4.0",
+  "date": "2026-10-31T16:16:15.431Z",
+  "titre": "Assistant Claude intégré : demandes depuis l’appli, publication automatique, versions et retour arrière",
+  "tag": "version/1.4.0"
+ },
+ {
+  "version": "1.3.0",
+  "date": "2026-10-31T11:50:00.000Z",
+  "titre": "Version de départ (GitHub, mises à jour automatiques)",
+  "tag": "version/1.3.0"
+ }
+]

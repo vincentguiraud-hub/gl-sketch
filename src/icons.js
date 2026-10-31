@@ -61,6 +61,7 @@ export const ICONS = {
   pergola: S(`<path d="M5 21V9.5M19 21V9.5" stroke-width="2"/><path d="M2.5 8.5h19" stroke-width="2"/><path ${a} d="M5 4.5v4M9 4.5v4M13 4.5v4M17 4.5v4M21 4.5v4"/>`),
   gate: S(`<rect x="2.5" y="6" width="9" height="13.5" rx=".6"/><rect x="12.5" y="6" width="9" height="13.5" rx=".6"/><path ${a} d="M5.5 6v13.5M8.5 6v13.5M15.5 6v13.5M18.5 6v13.5"/>`),
   report: S(`<rect x="4" y="2.5" width="16" height="19" rx="2"/><path d="M8 7.5h8M8 11.5h8M8 15.5h4"/><path ${a} d="M14.5 16l1.6 1.6 3-3.4"/>`),
+  sparkle: S(`<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" fill="currentColor" fill-opacity=".15"/><path ${a} d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>`),
   menu: S(`<path d="M4 7h16M4 12h16M4 17h16"/>`),
   panel: S(`<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14.5 4v16"/>`),
   close: S(`<path d="M6 6l12 12M18 6L6 18"/>`),

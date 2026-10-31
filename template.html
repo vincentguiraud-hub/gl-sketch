@@ -161,6 +161,39 @@ details[open] summary::before{transform:rotate(45deg)}
 .updbanner svg{color:var(--acc)}
 .updbanner button{border:0;background:var(--acc);color:#fff;border-radius:8px;padding:6px 12px;font-weight:600}
 .updbanner button.later{background:var(--surface-2);color:var(--txt-2)}
+/* assistant */
+.asbtn{display:flex;align-items:center;gap:6px;height:32px;padding:0 12px 0 9px;border:0;border-radius:9px;background:linear-gradient(135deg,#f08a3e,#d9601a);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(232,118,44,.35)}
+.asbtn svg .a{stroke:#fff}.asbtn:hover{filter:brightness(1.06)}
+.tab.badge{position:relative}.tab.badge::after{content:"";position:absolute;top:5px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 2px var(--surface-solid)}
+.as-hero{display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--acc-soft);border-radius:12px;margin-bottom:6px}
+.as-ico{width:36px;height:36px;flex:none;border-radius:10px;background:var(--acc);color:#fff;display:grid;place-items:center}.as-ico svg .a{stroke:#fff}
+.as-steps{padding-left:18px;margin:6px 0;color:var(--txt-2);font-size:12.5px}.as-steps li{margin:5px 0}
+.as-steps code,.as-body code{background:var(--surface-2);padding:1px 5px;border-radius:5px;font-size:12px}
+.as-btn{display:inline-flex;align-items:center;gap:7px;border:0;background:var(--acc);color:#fff;border-radius:9px;padding:8px 14px;font-weight:600;text-decoration:none}
+.btnrow .as-btn,.as-btn{background:var(--acc);color:#fff;border:0}.btnrow .as-btn:hover{background:var(--acc);filter:brightness(1.07)}
+.as-btn:disabled{opacity:.6}.btnrow .as-btn.ghost,.as-btn.ghost{background:var(--surface-2);color:var(--txt);border:1px solid var(--line-2)}
+.as-new textarea,.as-reply textarea{width:100%;resize:vertical;border:1px solid var(--line-2);border-radius:10px;padding:9px 11px;background:var(--surface-solid);outline:none;font:inherit;-webkit-user-select:text;user-select:text}
+.as-new textarea:focus,.as-reply textarea:focus{border-color:var(--sel);box-shadow:0 0 0 3px var(--sel-soft)}
+.as-bar{display:flex;align-items:center;gap:6px;margin:16px 0 6px}
+.as-item{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface-solid);border-radius:10px;padding:8px 10px;margin:4px 0}
+.as-item:hover{border-color:var(--acc)}.as-t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.as-chip{flex:none;font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--surface-2);color:var(--txt-2);white-space:nowrap}
+.as-chip.ok{background:rgba(34,197,94,.15);color:#15803d}.as-chip.wait{background:var(--acc-soft);color:var(--acc)}.as-chip.err{background:rgba(239,68,68,.13);color:#b91c1c}
+.as-foot{margin-top:14px;text-align:right}
+.as-thread{display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 380px);overflow-y:auto;padding:4px 2px}
+.as-msg{max-width:92%;padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.45;-webkit-user-select:text;user-select:text}
+.as-msg.me{align-self:flex-end;background:var(--acc);color:#fff;border-bottom-right-radius:4px}.as-msg.me code{background:rgba(255,255,255,.2)}
+.as-msg.bot{align-self:flex-start;background:var(--surface-2);border-bottom-left-radius:4px}
+.as-msg img{max-width:100%;border-radius:8px;margin-top:6px;display:block}.as-msg a{color:inherit}
+.as-who{display:flex;align-items:center;gap:5px;font-weight:650;font-size:12px;color:var(--acc);margin-bottom:3px}
+.as-at{font-size:10.5px;opacity:.6;margin-top:4px;text-align:right}
+.as-typing i{display:inline-block;width:6px;height:6px;margin-right:3px;border-radius:50%;background:var(--acc);animation:asb 1.2s infinite}.as-typing i:nth-child(2){animation-delay:.2s}.as-typing i:nth-child(3){animation-delay:.4s}
+@keyframes asb{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+.as-reply{display:flex;gap:6px;align-items:flex-end;margin-top:10px}.as-reply .as-btn{padding:10px 12px}
+.as-upd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;background:rgba(34,197,94,.12)}
+.as-ver{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin:5px 0}
+.as-ver.cur{border-color:#22c55e}.as-vt{font-size:12px;color:var(--txt-2);margin-top:2px}
+@media (max-width:900px){.asbtn span{display:none}.asbtn{padding:0 9px}.as-thread{max-height:calc(60vh - 160px)}}
 /* info-bulle */
 .tip{position:fixed;z-index:200;display:none;align-items:center;gap:8px;background:#111827;color:#f9fafb;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:500;pointer-events:none;box-shadow:var(--shadow-lg);white-space:nowrap}
 .tip.on{display:flex;animation:pop .1s ease-out}
@@ -215,6 +248,24 @@ details[open] summary::before{transform:rotate(45deg)}
 </head>
 <body>
 <div id="app"></div>
+<div id="bootfail" style="display:none;position:fixed;inset:0;z-index:999;background:#eef0f3;font:15px/1.5 system-ui,'Segoe UI',sans-serif;color:#111827;align-items:center;justify-content:center">
+ <div style="background:#fff;border-radius:16px;padding:26px 28px;max-width:460px;box-shadow:0 20px 60px rgba(16,24,40,.2)">
+  <h2 style="margin:0 0 8px;font-size:19px">G&amp;L Sketch n'a pas pu démarrer</h2>
+  <p style="margin:0 0 16px;color:#4b5563">La dernière mise à jour semble poser problème. Ton travail est conservé dans la sauvegarde automatique.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+   <a id="bootprev" href="./precedente/" style="background:#e8762c;color:#fff;text-decoration:none;padding:9px 16px;border-radius:9px;font-weight:600">Ouvrir la version précédente</a>
+   <a href="javascript:location.reload()" style="background:#f3f4f6;color:#111827;text-decoration:none;padding:9px 16px;border-radius:9px;font-weight:600">Réessayer</a>
+  </div>
+  <p id="booterr" style="margin:14px 0 0;color:#9ca3af;font-size:12px"></p>
+ </div>
+</div>
+<script>
+(function(){var shown=false;function fail(m){if(shown||window.glsketch)return;shown=true;var b=document.getElementById('bootfail');b.style.display='flex';
+ if(!/github\.io$/.test(location.hostname)||/\/precedente\//.test(location.pathname))document.getElementById('bootprev').style.display='none';
+ if(m)document.getElementById('booterr').textContent=String(m).slice(0,200);}
+ window.addEventListener('error',function(e){if(!window.glsketch)setTimeout(function(){fail(e.message)},1500)});
+ setTimeout(function(){if(!window.glsketch)fail('Délai de démarrage dépassé')},12000);})();
+</script>
 <script>/*APP*/</script>
 </body>
 </html>
