@@ -1,7 +1,7 @@
 {
   "name": "gl-sketch",
   "private": true,
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "G&L Sketch – modeleur 3D de G&L Créations",
   "type": "module",
   "scripts": {

@@ -521,21 +521,29 @@ export class UI {
     if (ent && !ent.outside && !app.sel.has(ent.key)) { app.sel.clear(); app.sel.add(ent.key); app.refreshSelection(); }
     const hasI = [...app.sel].some((k) => k[0] === 'i'), hasF = [...app.sel].some((k) => k[0] === 'f'), hasE = [...app.sel].some((k) => k[0] === 'e');
     const nI = [...app.sel].filter((k) => k[0] === 'i').length;
+    const has = app.sel.size > 0;
     const items = [];
-    if (app.sel.size) {
-      items.push(['Effacer', 'delete'], ['Masquer', 'hide'], ['Zoom sur la sélection', 'zoomsel'], '-');
-      if (hasI) items.push(['Modifier le groupe/composant', 'edit'], ['Éclater', 'explode'], ['Rendre unique', 'unique']);
-      items.push(['Créer un groupe', 'group'], ['Créer un composant…', 'component']);
+    // Créer un groupe / un composant : toujours présents (grisés tant que rien n'est sélectionné)
+    items.push(['Créer un groupe', 'group', 'Ctrl+G', !has], ['Créer un composant…', 'component', 'G', !has]);
+    if (has) {
+      if (hasI) items.push('-', ['Modifier le groupe/composant', 'edit'], ['Éclater', 'explode'], ['Rendre unique', 'unique']);
       if (nI === 2) items.push('-', ['Union', 'solid:union'], ['Soustraire', 'solid:sub'], ['Intersection', 'solid:inter']);
       if (hasF) items.push('-', ['Inverser les faces', 'reverse']);
       if (hasE) items.push('-', ['Adoucir', 'soften'], ['Durcir', 'harden']);
-      items.push('-', ['Copier', 'copy'], ['Couper', 'cut']);
-    }
-    if (this.clip) items.push(['Coller', 'paste']);
-    if (app.activePath.length) items.push('-', ['Fermer le groupe', 'closeCtx']);
-    items.push('-', ['Zoom étendu', 'zoomext'], ['Afficher tout', 'unhideAll']);
+      items.push('-', ['Copier', 'copy', 'Ctrl+C'], ['Couper', 'cut', 'Ctrl+X'], ['Effacer', 'delete', 'Suppr'], ['Masquer', 'hide'], ['Zoom sur la sélection', 'zoomsel']);
+    } else items.push('-', ['Tout sélectionner', 'selectAll', 'Ctrl+A']);
+    if (this.clip) items.push('-', ['Coller', 'paste', 'Ctrl+V']);
+    if (app.activePath.length) items.push('-', ['Fermer le groupe', 'closeCtx', 'Échap']);
+    items.push('-', ['Zoom étendu', 'zoomext', 'Maj+Z'], ['Afficher tout', 'unhideAll']);
+    // pas de séparateur en tête, en fin, ni en double
+    const clean = items.filter((it, i, a) => it !== '-' || (i > 0 && i < a.length - 1 && a[i - 1] !== '-'));
     const m = $('#ctxmenu'); m.innerHTML = '';
-    for (const it of items) m.append(it === '-' ? h('hr') : h('button', { onclick: (e) => { e.stopPropagation(); this.hideCtx(); this.cmd(it[1]); } }, it[0]));
+    for (const it of clean) {
+      if (it === '-') { m.append(h('hr')); continue; }
+      const [label, cmd, key, disabled] = it;
+      m.append(h('button', { class: disabled ? 'dis' : null, 'data-cmd': cmd, title: disabled ? 'Sélectionne d\'abord des éléments (clic, double-clic ou fenêtre de sélection)' : null,
+        onclick: (e) => { e.stopPropagation(); if (disabled) { this.toast('Sélectionne d\'abord des éléments à regrouper'); return; } this.hideCtx(); this.cmd(cmd); } }, h('span', {}, label), key ? h('kbd', {}, key) : null));
+    }
     const r = $('#viewport').getBoundingClientRect();
     m.style.display = 'block';
     const x = Math.min(E.x + r.left, window.innerWidth - m.offsetWidth - 6), y = Math.min(E.y + r.top, window.innerHeight - m.offsetHeight - 6);

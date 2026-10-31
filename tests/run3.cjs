@@ -39,6 +39,15 @@ const R = []; const ok = (name, cond, info) => { if (!cond) process.exitCode = 1
   await p.mouse.click(bb.x + sx, bb.y + sy, { button: 'right' }); await p.waitForTimeout(100);
   const items = await p.evaluate(()=>[...document.querySelectorAll('#ctxmenu button')].map(b=>b.textContent));
   ok('Menu contextuel', items.length > 5, items.slice(0,6));
+  ok('Clic droit : Créer un groupe / un composant', items.includes('Créer un groupeCtrl+G') && items.includes('Créer un composant…G'), items.slice(0,3));
+  await p.evaluate(()=>glsketch.hideCtx());
+  // clic droit dans le vide sans sélection : les deux commandes restent visibles (grisées)
+  await p.evaluate(()=>{ glsketch.app.sel.clear(); glsketch.app.refreshSelection(); });
+  await p.mouse.click(bb.x + bb.width * 0.45, bb.y + 110, { button: 'right' }); await p.waitForTimeout(100);
+  const vide = await p.evaluate(()=>[...document.querySelectorAll('#ctxmenu button')].map(b=>(b.classList.contains('dis')?'(grisé) ':'')+b.dataset.cmd));
+  const firstHr = await p.evaluate(()=>document.querySelector('#ctxmenu').firstElementChild.tagName);
+  ok('Clic droit dans le vide : groupe/composant grisés, pas de trait en tête', vide.includes('(grisé) group') && vide.includes('(grisé) component') && firstHr !== 'HR', [vide, firstHr]);
+  await p.evaluate(()=>glsketch.hideCtx());
   await p.keyboard.press('Escape'); await p.evaluate(()=>glsketch.hideCtx());
   // toutes les commandes de menu (sauf fichiers / modales bloquantes)
   const cmds = await p.evaluate(()=>[...document.querySelectorAll('.mdrop button')].map(b=>b.dataset.cmd));
