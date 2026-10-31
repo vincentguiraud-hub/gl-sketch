@@ -22,10 +22,11 @@ jobs:
         continue-on-error: true
         run: |
           git fetch --tags -q
-          CUR=$(git rev-parse HEAD^{tree}); PREV=""
-          for t in $(git tag -l 'version/*' --sort=-creatordate); do
-            [ "$(git rev-parse "$t^{tree}")" != "$CUR" ] && { PREV="$t"; break; }
-          done
+          CUR=$(git rev-parse HEAD^{tree})
+          PREV=$(node -e '
+            const {execSync}=require("child_process"); const l=require("./versions.json"); const cur=process.argv[1];
+            const ref=(e)=>{ for (const r of [e.tag, e.commit].filter(Boolean)) { try { execSync("git rev-parse -q --verify "+r+"^{commit}",{stdio:"ignore"}); return r; } catch(x){} } return ""; };
+            for (const e of l) { const r=ref(e); if (!r) continue; const t=execSync("git rev-parse "+r+"^{tree}").toString().trim(); if (t!==cur) { console.log(r); break; } }' "$CUR")
           [ -z "$PREV" ] && { echo "Pas encore de version précédente"; exit 0; }
           git worktree add -q /tmp/prev "$PREV"
           (cd /tmp/prev && npm ci --no-audit --no-fund && npm run build)

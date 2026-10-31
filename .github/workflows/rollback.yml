@@ -1,7 +1,7 @@
 name: Revenir à une version sauvegardée
 # Remet en ligne une version sauvegardée.
 #  - tag vide : « version précédente » = la sauvegarde la plus récente différente de la version actuelle
-#  - tag = version/1.3.4 ou sauvegarde/... : cette version précise
+#  - tag = version/1.3.4, sauvegarde/... ou identifiant de commit : cette version précise
 # L'état actuel est lui-même sauvegardé avant, pour pouvoir annuler le retour arrière.
 on:
   workflow_dispatch:
@@ -40,12 +40,12 @@ jobs:
           git config user.email "noreply@anthropic.com"
           git fetch --tags -q
           CUR=$(git rev-parse HEAD^{tree})
+          # sans version précisée : la version suivante dans versions.json (la plus récente différente de l'actuelle)
           if [ -n "$WANT" ]; then TARGET="$WANT"; else
-            TARGET=""
-            for t in $(git tag -l 'sauvegarde/*' 'version/*' --sort=-creatordate); do
-              case "$t" in *avant-retour*) continue;; esac
-              [ "$(git rev-parse "$t^{tree}")" != "$CUR" ] && { TARGET="$t"; break; }
-            done
+            TARGET=$(node -e '
+              const {execSync}=require("child_process"); const l=require("./versions.json"); const cur=process.argv[1];
+              const ref=(e)=>{ for (const r of [e.tag, e.commit].filter(Boolean)) { try { execSync("git rev-parse -q --verify "+r+"^{commit}",{stdio:"ignore"}); return r; } catch(x){} } return ""; };
+              for (const e of l) { if (e.sansAssistant) continue; const r=ref(e); if (!r) continue; const t=execSync("git rev-parse "+r+"^{tree}").toString().trim(); if (t!==cur) { console.log(r); break; } }' "$CUR")
           fi
           if [ -z "$TARGET" ] || ! git rev-parse -q --verify "$TARGET^{commit}" >/dev/null; then echo "none=1" >> "$GITHUB_OUTPUT"; exit 0; fi
           NOW="sauvegarde/$(TZ=Europe/Paris date +%Y-%m-%d_%Hh%M%S)-avant-retour"
@@ -54,8 +54,10 @@ jobs:
           cp versions.json /tmp/versions.json 2>/dev/null || echo "[]" > /tmp/versions.json
           cp package.json /tmp/package.json
           # fichiers de l'application à l'état de la version visée (sans toucher aux automatismes ni au lanceur)
-          git diff --name-only --diff-filter=A "$TARGET" HEAD -- src assets tests template.html build.mjs | xargs -r git rm -q
-          git checkout "$TARGET" -- src assets tests template.html build.mjs
+          PATHS="src assets template.html build.mjs"
+          git cat-file -e "$TARGET:tests" 2>/dev/null && PATHS="$PATHS tests"
+          git diff --name-only --diff-filter=A "$TARGET" HEAD -- $PATHS | xargs -r git rm -q
+          git checkout "$TARGET" -- $PATHS
           cp /tmp/package.json package.json
           npm version patch --no-git-tag-version > /dev/null
           V=$(node -p "require('./package.json').version")
