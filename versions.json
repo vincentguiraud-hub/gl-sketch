@@ -1,5 +1,11 @@
 [
  {
+  "version": "1.4.1",
+  "date": "2026-10-31T23:01:45.996Z",
+  "titre": "Clic droit : Créer un groupe / Créer un composant",
+  "commit": "a1ce4ab37dbe368be76622868eabae6d81e7ecfe"
+ },
+ {
   "version": "1.4.0",
   "date": "2026-10-31T16:16:15.431Z",
   "titre": "Assistant Claude intégré : demandes depuis l’appli, publication automatique, versions et retour arrière",
